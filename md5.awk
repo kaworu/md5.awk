@@ -1,5 +1,5 @@
-# NOTE: this script needs GNU awk, because it has raw number in hex (eg. 0x80)
-# and uses bitwise operators (i.e. xor(), compl() & al.).
+# NOTE: this script needs GNU awk, because it uses bitwise operators
+# (i.e. xor(), compl() & al.).
 
 BEGIN {
 	_ord_init();
@@ -38,10 +38,10 @@ function md5(input,
 	if (nbytes % 4 == 0) {
 		# the input size is congruent modulo 32, we need a new word to
 		# store the first '1' padding bit.
-		words[nwords++] = 0x80;
+		words[nwords++] = 128; # 0x80
 	} else {
 		# append a '1' bit in the bytes just after the last input byte.
-		words[nwords - 1] = or(words[nwords - 1], lshift(0x80, (nbytes % 4) * 8));
+		words[nwords - 1] = or(words[nwords - 1], lshift(128, (nbytes % 4) * 8));
 	}
 	# fill the remaining bytes with 0 until we're just shy two words of
 	# having 16-Word Blocks.
@@ -53,10 +53,10 @@ function md5(input,
 	words[nwords++] = lo;
 	words[nwords++] = mod32(hi);
 	# Step 3. Initialize MD Buffer
-	state[0] = 0x67452301;
-	state[1] = 0xefcdab89;
-	state[2] = 0x98badcfe;
-	state[3] = 0x10325476;
+	state[0] = 1732584193; # 0x67452301
+	state[1] = 4023233417; # 0xefcdab89
+	state[2] = 2562383102; # 0x98badcfe
+	state[3] =  271733878; # 0x10325476
 	# Step 4. Process Message in 16-Word Blocks
 	# Process each 16-word block.
 	for (i = 0; i < nwords; i += 16) {
@@ -65,76 +65,76 @@ function md5(input,
 			x[j] = words[i + j];
 		a = state[0]; b = state[1]; c = state[2]; d = state[3];
 		# Round 1
-		a = FF(a, b, c, d, x[ 0], S11, 0xd76aa478);
-		d = FF(d, a, b, c, x[ 1], S12, 0xe8c7b756);
-		c = FF(c, d, a, b, x[ 2], S13, 0x242070db);
-		b = FF(b, c, d, a, x[ 3], S14, 0xc1bdceee);
-		a = FF(a, b, c, d, x[ 4], S11, 0xf57c0faf);
-		d = FF(d, a, b, c, x[ 5], S12, 0x4787c62a);
-		c = FF(c, d, a, b, x[ 6], S13, 0xa8304613);
-		b = FF(b, c, d, a, x[ 7], S14, 0xfd469501);
-		a = FF(a, b, c, d, x[ 8], S11, 0x698098d8);
-		d = FF(d, a, b, c, x[ 9], S12, 0x8b44f7af);
-		c = FF(c, d, a, b, x[10], S13, 0xffff5bb1);
-		b = FF(b, c, d, a, x[11], S14, 0x895cd7be);
-		a = FF(a, b, c, d, x[12], S11, 0x6b901122);
-		d = FF(d, a, b, c, x[13], S12, 0xfd987193);
-		c = FF(c, d, a, b, x[14], S13, 0xa679438e);
-		b = FF(b, c, d, a, x[15], S14, 0x49b40821);
+		a = FF(a, b, c, d, x[ 0], S11, 3614090360); # 0xd76aa478
+		d = FF(d, a, b, c, x[ 1], S12, 3905402710); # 0xe8c7b756
+		c = FF(c, d, a, b, x[ 2], S13,  606105819); # 0x242070db
+		b = FF(b, c, d, a, x[ 3], S14, 3250441966); # 0xc1bdceee
+		a = FF(a, b, c, d, x[ 4], S11, 4118548399); # 0xf57c0faf
+		d = FF(d, a, b, c, x[ 5], S12, 1200080426); # 0x4787c62a
+		c = FF(c, d, a, b, x[ 6], S13, 2821735955); # 0xa8304613
+		b = FF(b, c, d, a, x[ 7], S14, 4249261313); # 0xfd469501
+		a = FF(a, b, c, d, x[ 8], S11, 1770035416); # 0x698098d8
+		d = FF(d, a, b, c, x[ 9], S12, 2336552879); # 0x8b44f7af
+		c = FF(c, d, a, b, x[10], S13, 4294925233); # 0xffff5bb1
+		b = FF(b, c, d, a, x[11], S14, 2304563134); # 0x895cd7be
+		a = FF(a, b, c, d, x[12], S11, 1804603682); # 0x6b901122
+		d = FF(d, a, b, c, x[13], S12, 4254626195); # 0xfd987193
+		c = FF(c, d, a, b, x[14], S13, 2792965006); # 0xa679438e
+		b = FF(b, c, d, a, x[15], S14, 1236535329); # 0x49b40821
 
 		# Round 2
-		a = GG(a, b, c, d, x[ 1], S21, 0xf61e2562);
-		d = GG(d, a, b, c, x[ 6], S22, 0xc040b340);
-		c = GG(c, d, a, b, x[11], S23, 0x265e5a51);
-		b = GG(b, c, d, a, x[ 0], S24, 0xe9b6c7aa);
-		a = GG(a, b, c, d, x[ 5], S21, 0xd62f105d);
-		d = GG(d, a, b, c, x[10], S22,  0x2441453);
-		c = GG(c, d, a, b, x[15], S23, 0xd8a1e681);
-		b = GG(b, c, d, a, x[ 4], S24, 0xe7d3fbc8);
-		a = GG(a, b, c, d, x[ 9], S21, 0x21e1cde6);
-		d = GG(d, a, b, c, x[14], S22, 0xc33707d6);
-		c = GG(c, d, a, b, x[ 3], S23, 0xf4d50d87);
-		b = GG(b, c, d, a, x[ 8], S24, 0x455a14ed);
-		a = GG(a, b, c, d, x[13], S21, 0xa9e3e905);
-		d = GG(d, a, b, c, x[ 2], S22, 0xfcefa3f8);
-		c = GG(c, d, a, b, x[ 7], S23, 0x676f02d9);
-		b = GG(b, c, d, a, x[12], S24, 0x8d2a4c8a);
+		a = GG(a, b, c, d, x[ 1], S21, 4129170786); # 0xf61e2562
+		d = GG(d, a, b, c, x[ 6], S22, 3225465664); # 0xc040b340
+		c = GG(c, d, a, b, x[11], S23,  643717713); # 0x265e5a51
+		b = GG(b, c, d, a, x[ 0], S24, 3921069994); # 0xe9b6c7aa
+		a = GG(a, b, c, d, x[ 5], S21, 3593408605); # 0xd62f105d
+		d = GG(d, a, b, c, x[10], S22,   38016083); # 0x2441453
+		c = GG(c, d, a, b, x[15], S23, 3634488961); # 0xd8a1e681
+		b = GG(b, c, d, a, x[ 4], S24, 3889429448); # 0xe7d3fbc8
+		a = GG(a, b, c, d, x[ 9], S21,  568446438); # 0x21e1cde6
+		d = GG(d, a, b, c, x[14], S22, 3275163606); # 0xc33707d6
+		c = GG(c, d, a, b, x[ 3], S23, 4107603335); # 0xf4d50d87
+		b = GG(b, c, d, a, x[ 8], S24, 1163531501); # 0x455a14ed
+		a = GG(a, b, c, d, x[13], S21, 2850285829); # 0xa9e3e905
+		d = GG(d, a, b, c, x[ 2], S22, 4243563512); # 0xfcefa3f8
+		c = GG(c, d, a, b, x[ 7], S23, 1735328473); # 0x676f02d9
+		b = GG(b, c, d, a, x[12], S24, 2368359562); # 0x8d2a4c8a
 
 		# Round 3
-		a = HH(a, b, c, d, x[ 5], S31, 0xfffa3942);
-		d = HH(d, a, b, c, x[ 8], S32, 0x8771f681);
-		c = HH(c, d, a, b, x[11], S33, 0x6d9d6122);
-		b = HH(b, c, d, a, x[14], S34, 0xfde5380c);
-		a = HH(a, b, c, d, x[ 1], S31, 0xa4beea44);
-		d = HH(d, a, b, c, x[ 4], S32, 0x4bdecfa9);
-		c = HH(c, d, a, b, x[ 7], S33, 0xf6bb4b60);
-		b = HH(b, c, d, a, x[10], S34, 0xbebfbc70);
-		a = HH(a, b, c, d, x[13], S31, 0x289b7ec6);
-		d = HH(d, a, b, c, x[ 0], S32, 0xeaa127fa);
-		c = HH(c, d, a, b, x[ 3], S33, 0xd4ef3085);
-		b = HH(b, c, d, a, x[ 6], S34,  0x4881d05);
-		a = HH(a, b, c, d, x[ 9], S31, 0xd9d4d039);
-		d = HH(d, a, b, c, x[12], S32, 0xe6db99e5);
-		c = HH(c, d, a, b, x[15], S33, 0x1fa27cf8);
-		b = HH(b, c, d, a, x[ 2], S34, 0xc4ac5665);
+		a = HH(a, b, c, d, x[ 5], S31, 4294588738); # 0xfffa3942
+		d = HH(d, a, b, c, x[ 8], S32, 2272392833); # 0x8771f681
+		c = HH(c, d, a, b, x[11], S33, 1839030562); # 0x6d9d6122
+		b = HH(b, c, d, a, x[14], S34, 4259657740); # 0xfde5380c
+		a = HH(a, b, c, d, x[ 1], S31, 2763975236); # 0xa4beea44
+		d = HH(d, a, b, c, x[ 4], S32, 1272893353); # 0x4bdecfa9
+		c = HH(c, d, a, b, x[ 7], S33, 4139469664); # 0xf6bb4b60
+		b = HH(b, c, d, a, x[10], S34, 3200236656); # 0xbebfbc70
+		a = HH(a, b, c, d, x[13], S31,  681279174); # 0x289b7ec6
+		d = HH(d, a, b, c, x[ 0], S32, 3936430074); # 0xeaa127fa
+		c = HH(c, d, a, b, x[ 3], S33, 3572445317); # 0xd4ef3085
+		b = HH(b, c, d, a, x[ 6], S34,   76029189); # 0x4881d05
+		a = HH(a, b, c, d, x[ 9], S31, 3654602809); # 0xd9d4d039
+		d = HH(d, a, b, c, x[12], S32, 3873151461); # 0xe6db99e5
+		c = HH(c, d, a, b, x[15], S33,  530742520); # 0x1fa27cf8
+		b = HH(b, c, d, a, x[ 2], S34, 3299628645); # 0xc4ac5665
 
 		# Round 4
-		a = II(a, b, c, d, x[ 0], S41, 0xf4292244);
-		d = II(d, a, b, c, x[ 7], S42, 0x432aff97);
-		c = II(c, d, a, b, x[14], S43, 0xab9423a7);
-		b = II(b, c, d, a, x[ 5], S44, 0xfc93a039);
-		a = II(a, b, c, d, x[12], S41, 0x655b59c3);
-		d = II(d, a, b, c, x[ 3], S42, 0x8f0ccc92);
-		c = II(c, d, a, b, x[10], S43, 0xffeff47d);
-		b = II(b, c, d, a, x[ 1], S44, 0x85845dd1);
-		a = II(a, b, c, d, x[ 8], S41, 0x6fa87e4f);
-		d = II(d, a, b, c, x[15], S42, 0xfe2ce6e0);
-		c = II(c, d, a, b, x[ 6], S43, 0xa3014314);
-		b = II(b, c, d, a, x[13], S44, 0x4e0811a1);
-		a = II(a, b, c, d, x[ 4], S41, 0xf7537e82);
-		d = II(d, a, b, c, x[11], S42, 0xbd3af235);
-		c = II(c, d, a, b, x[ 2], S43, 0x2ad7d2bb);
-		b = II(b, c, d, a, x[ 9], S44, 0xeb86d391);
+		a = II(a, b, c, d, x[ 0], S41, 4096336452); # 0xf4292244
+		d = II(d, a, b, c, x[ 7], S42, 1126891415); # 0x432aff97
+		c = II(c, d, a, b, x[14], S43, 2878612391); # 0xab9423a7
+		b = II(b, c, d, a, x[ 5], S44, 4237533241); # 0xfc93a039
+		a = II(a, b, c, d, x[12], S41, 1700485571); # 0x655b59c3
+		d = II(d, a, b, c, x[ 3], S42, 2399980690); # 0x8f0ccc92
+		c = II(c, d, a, b, x[10], S43, 4293915773); # 0xffeff47d
+		b = II(b, c, d, a, x[ 1], S44, 2240044497); # 0x85845dd1
+		a = II(a, b, c, d, x[ 8], S41, 1873313359); # 0x6fa87e4f
+		d = II(d, a, b, c, x[15], S42, 4264355552); # 0xfe2ce6e0
+		c = II(c, d, a, b, x[ 6], S43, 2734768916); # 0xa3014314
+		b = II(b, c, d, a, x[13], S44, 1309151649); # 0x4e0811a1
+		a = II(a, b, c, d, x[ 4], S41, 4149444226); # 0xf7537e82
+		d = II(d, a, b, c, x[11], S42, 3174756917); # 0xbd3af235
+		c = II(c, d, a, b, x[ 2], S43,  718787259); # 0x2ad7d2bb
+		b = II(b, c, d, a, x[ 9], S44, 3951481745); # 0xeb86d391
 
 		state[0] = mod32(state[0] + a);
 		state[1] = mod32(state[1] + b);
@@ -143,10 +143,10 @@ function md5(input,
 	}
 
 	for (i = j = 0; j < 16; j += 4) {
-		digest[j] = and(state[i], 0xff);
-		digest[j+1] = and(rshift(state[i],  8), 0xff);
-		digest[j+2] = and(rshift(state[i], 16), 0xff);
-		digest[j+3] = and(rshift(state[i++], 24), 0xff);
+		digest[j] = and(state[i], 255); # 0xff
+		digest[j+1] = and(rshift(state[i],  8), 255);
+		digest[j+2] = and(rshift(state[i], 16), 255);
+		digest[j+3] = and(rshift(state[i++], 24), 255);
 	}
 	for (i = 0; i < 16; i++)
 		ret = sprintf("%s%02x", ret, digest[i]);
@@ -196,7 +196,7 @@ function II(a, b, c, d, x, s, ac) {
 }
 
 function mod32(x) {
-	return and(x, 0xffffffff);
+	return and(x, 4294967295); # 0xffffffff
 }
 
 function not(x) {
